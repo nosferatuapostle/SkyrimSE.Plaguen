@@ -55,40 +55,72 @@ namespace RE
 	}
 }
 
-namespace FormID
-{
-	constexpr RE::FormID WarriorStone = 0x000E5F4B;
-	constexpr RE::FormID MageStone = 0x000E5F48;
-	constexpr RE::FormID ThiefStone = 0x000E5F44;
+static float BONUS_RESIST = 0.0f;
 
-	constexpr RE::FormID Argonian = 79680;
-	constexpr RE::FormID Breton = 79681;
-	constexpr RE::FormID DarkElf = 79682;
-	constexpr RE::FormID HighElf = 79683;
-	constexpr RE::FormID Imperial = 79684;
-	constexpr RE::FormID Khajiit = 79685;
-	constexpr RE::FormID Nord = 79686;
-	constexpr RE::FormID Orc = 79687;
-	constexpr RE::FormID Redguard = 79688;
-	constexpr RE::FormID WoodElf = 79689;
-	constexpr RE::FormID ArgonianVampire = 559162;
-	constexpr RE::FormID BretonVampire = 559164;
-	constexpr RE::FormID DarkElfVampire = 559165;
-	constexpr RE::FormID HighElfVampire = 559168;
-	constexpr RE::FormID ImperialVampire = 559172;
-	constexpr RE::FormID KhajiitVampire = 559173;
-	constexpr RE::FormID NordVampire = 558996;
-	constexpr RE::FormID OrcVampire = 688825;
-	constexpr RE::FormID RedguardVampire = 559174;
-	constexpr RE::FormID WoodElfVampire = 559236;
-}
+constexpr RE::FormID MGEF_WARRIOR_STONE = 0x000E5F4B;
+constexpr RE::FormID MGEF_MAGE_STONE = 0x000E5F48;
+constexpr RE::FormID MGEF_THIEF_STONE = 0x000E5F44;
+
+constexpr RE::FormID RACE_ARGONIAN = 79680;
+constexpr RE::FormID RACE_BRETON = 79681;
+constexpr RE::FormID RACE_DARKELF = 79682;
+constexpr RE::FormID RACE_HIGHELF = 79683;
+constexpr RE::FormID RACE_IMPERIAL = 79684;
+constexpr RE::FormID RACE_KHAJIIT = 79685;
+constexpr RE::FormID RACE_NORD = 79686;
+constexpr RE::FormID RACE_ORC = 79687;
+constexpr RE::FormID RACE_REDGUARD = 79688;
+constexpr RE::FormID RACE_WOODELF = 79689;
+constexpr RE::FormID RACE_ARGONIAN_VAMPIRE = 559162;
+constexpr RE::FormID RACE_BRETON_VAMPIRE = 559164;
+constexpr RE::FormID RACE_DARKELF_VAMPIRE = 559165;
+constexpr RE::FormID RACE_HIGHELF_VAMPIRE = 559168;
+constexpr RE::FormID RACE_IMPERIAL_VAMPIRE = 559172;
+constexpr RE::FormID RACE_KHAJIIT_VAMPIRE = 559173;
+constexpr RE::FormID RACE_NORD_VAMPIRE = 558996;
+constexpr RE::FormID RACE_ORC_VAMPIRE = 688825;
+constexpr RE::FormID RACE_REDGUARD_VAMPIRE = 559174;
+constexpr RE::FormID RACE_WOODELF_VAMPIRE = 559236;
+
+class EventSink
+{
+public:
+	template <typename EventType>
+	static void Register(RE::BSEventNotifyControl (*handler)(const EventType*, RE::BSTEventSource<EventType>*))
+	{
+		struct Sink : RE::BSTEventSink<EventType>
+		{
+			decltype(handler) _handler;
+			explicit Sink(decltype(handler) h) : _handler(h) {}
+			RE::BSEventNotifyControl ProcessEvent(const EventType* e, RE::BSTEventSource<EventType>* s) override
+			{
+				return _handler(e, s);
+			}
+		};
+		static Sink instance(handler);
+		if (auto* source = GetEventSource<EventType>()) {
+			source->AddEventSink(&instance);
+		}
+	}
+
+private:
+	template <typename EventType>
+	static RE::BSTEventSource<EventType>* GetEventSource()
+	{
+		if constexpr (std::is_same_v<EventType, SKSE::ActionEvent>) {
+			return SKSE::GetActionEventSource();
+		} else {
+			return RE::ScriptEventSourceHolder::GetSingleton();
+		}
+	}
+};
 
 namespace SettingsData
 {
-	RE::GameSettingCollection* GSC = RE::GameSettingCollection::GetSingleton();
-	RE::Setting* fArmorRatingScalingFactor = GSC->GetSetting("fArmorScalingFactor");
-	RE::Setting* fMaxArmorRating = GSC->GetSetting("fMaxArmorRating");
-	RE::Setting* fSprintStaminaDrainMult = GSC->GetSetting("fSprintStaminaDrainMult");
+	auto GSC = RE::GameSettingCollection::GetSingleton();
+	auto fArmorRatingScalingFactor = GSC->GetSetting("fArmorScalingFactor");
+	auto fMaxArmorRating = GSC->GetSetting("fMaxArmorRating");
+	auto fSprintStaminaDrainMult = GSC->GetSetting("fSprintStaminaDrainMult");
 
 	void Initialize()
 	{
@@ -99,17 +131,14 @@ namespace SettingsData
 
 namespace ArmorRescaled
 {
-	constexpr float kHyperDenomShift = 0.2f;
+	constexpr float kScale = 40.0f;
 
 	static inline float ConvertDamageResist(float vanillaResist)
 	{
-		float result;
-		if (vanillaResist > 0.0f)
-			result = vanillaResist / (vanillaResist + kHyperDenomShift);
-		else
-			result = vanillaResist / kHyperDenomShift;
-
-		return result;
+		if (vanillaResist <= 0.0f)
+			return 0.0f;
+		
+		return vanillaResist / (vanillaResist + kScale) + BONUS_RESIST;
 	}
 }
 
@@ -126,26 +155,26 @@ namespace RaceLevelSystem
 	};
 	
 	const std::unordered_map<RE::FormID, RaceValuesData> RACE_VALUES = {
-		{ FormID::Argonian,        { 115.0f, 75.0f,  110.0f, 4.0f, 2.0f, 4.0f } },
-		{ FormID::Breton,          { 90.0f,  115.0f, 95.0f,  2.0f, 5.0f, 3.0f } },
-		{ FormID::DarkElf,         { 105.0f, 105.0f, 105.0f, 3.0f, 3.0f, 3.0f } },
-		{ FormID::HighElf,         { 85.0f,  125.0f, 90.0f,  2.0f, 7.0f, 2.0f } },
-		{ FormID::Imperial,        { 110.0f, 80.0f,  110.0f, 4.0f, 2.0f, 4.0f } },
-		{ FormID::Khajiit,         { 100.0f, 75.0f,  125.0f, 3.0f, 2.0f, 6.0f } },
-		{ FormID::Nord,            { 120.0f, 70.0f,  110.0f, 5.0f, 1.0f, 4.0f } },
-		{ FormID::Orc,             { 125.0f, 60.0f,  115.0f, 6.0f, 1.0f, 4.0f } },
-		{ FormID::Redguard,        { 115.0f, 65.0f,  120.0f, 4.0f, 1.0f, 5.0f } },
-		{ FormID::WoodElf,         { 95.0f,  90.0f,  115.0f, 2.0f, 3.0f, 5.0f } },
-		{ FormID::ArgonianVampire, { 115.0f, 75.0f,  110.0f, 5.0f, 3.0f, 5.0f } },
-		{ FormID::BretonVampire,   { 90.0f,  115.0f, 95.0f,  3.0f, 6.0f, 4.0f } },
-		{ FormID::DarkElfVampire,  { 105.0f, 105.0f, 105.0f, 4.0f, 4.0f, 4.0f } },
-		{ FormID::HighElfVampire,  { 85.0f,  125.0f, 90.0f,  3.0f, 8.0f, 3.0f } },
-		{ FormID::ImperialVampire, { 110.0f, 80.0f,  110.0f, 5.0f, 3.0f, 5.0f } },
-		{ FormID::KhajiitVampire,  { 100.0f, 75.0f,  125.0f, 4.0f, 3.0f, 7.0f } },
-		{ FormID::NordVampire,     { 120.0f, 70.0f,  110.0f, 6.0f, 2.0f, 5.0f } },
-		{ FormID::OrcVampire,      { 125.0f, 60.0f,  115.0f, 7.0f, 2.0f, 5.0f } },
-		{ FormID::RedguardVampire, { 115.0f, 65.0f,  120.0f, 5.0f, 2.0f, 6.0f } },
-		{ FormID::WoodElfVampire,  { 95.0f,  90.0f,  115.0f, 3.0f, 5.0f, 6.0f } }
+		{ RACE_ARGONIAN,         { 115.0f, 75.0f,  110.0f, 4.0f, 2.0f, 4.0f } },
+		{ RACE_BRETON,           { 90.0f,  115.0f, 95.0f,  2.0f, 5.0f, 3.0f } },
+		{ RACE_DARKELF,          { 105.0f, 105.0f, 105.0f, 3.0f, 3.0f, 3.0f } },
+		{ RACE_HIGHELF,          { 85.0f,  125.0f, 90.0f,  2.0f, 7.0f, 2.0f } },
+		{ RACE_IMPERIAL,         { 110.0f, 80.0f,  110.0f, 4.0f, 2.0f, 4.0f } },
+		{ RACE_KHAJIIT,          { 100.0f, 75.0f,  125.0f, 3.0f, 2.0f, 6.0f } },
+		{ RACE_NORD,             { 120.0f, 70.0f,  110.0f, 5.0f, 1.0f, 4.0f } },
+		{ RACE_ORC,              { 125.0f, 60.0f,  115.0f, 6.0f, 1.0f, 4.0f } },
+		{ RACE_REDGUARD,         { 115.0f, 65.0f,  120.0f, 4.0f, 1.0f, 5.0f } },
+		{ RACE_WOODELF,          { 95.0f,  90.0f,  115.0f, 2.0f, 3.0f, 5.0f } },
+		{ RACE_ARGONIAN_VAMPIRE, { 115.0f, 75.0f,  110.0f, 5.0f, 3.0f, 5.0f } },
+		{ RACE_BRETON_VAMPIRE,   { 90.0f,  115.0f, 95.0f,  3.0f, 6.0f, 4.0f } },
+		{ RACE_DARKELF_VAMPIRE,  { 105.0f, 105.0f, 105.0f, 4.0f, 4.0f, 4.0f } },
+		{ RACE_HIGHELF_VAMPIRE,  { 85.0f,  125.0f, 90.0f,  3.0f, 8.0f, 3.0f } },
+		{ RACE_IMPERIAL_VAMPIRE, { 110.0f, 80.0f,  110.0f, 5.0f, 3.0f, 5.0f } },
+		{ RACE_KHAJIIT_VAMPIRE,  { 100.0f, 75.0f,  125.0f, 4.0f, 3.0f, 7.0f } },
+		{ RACE_NORD_VAMPIRE,     { 120.0f, 70.0f,  110.0f, 6.0f, 2.0f, 5.0f } },
+		{ RACE_ORC_VAMPIRE,      { 125.0f, 60.0f,  115.0f, 7.0f, 2.0f, 5.0f } },
+		{ RACE_REDGUARD_VAMPIRE, { 115.0f, 65.0f,  120.0f, 5.0f, 2.0f, 6.0f } },
+		{ RACE_WOODELF_VAMPIRE,  { 95.0f,  90.0f,  115.0f, 3.0f, 5.0f, 6.0f } }
 	};
 
 	RaceValuesData GetValues(RE::TESRace* race)
@@ -160,14 +189,24 @@ namespace RaceLevelSystem
 		return data;
 	}
 
+	static void UpdateResist(RE::Actor* a)
+	{
+		float vanillaResist = a->armorRating * SettingsData::fArmorRatingScalingFactor->data.f;
+		float magicResist = ArmorRescaled::ConvertDamageResist(vanillaResist) * 50.0f;
+
+		a->SetBaseActorValue(RE::ActorValue::kResistMagic, magicResist);
+	}
+
 	static void UpdateValues(RE::Actor* a)
 	{
+		//todo: stats increase another bonuses, phys damage, magic damage, attack speed, obsorb damage(phys/magic)...
+
 		SKSE::GetTaskInterface()->AddTask([a]() {
 			auto data = GetValues(a->race);
 
-			RE::EffectSetting* warriorStone = RE::TESForm::LookupByID<RE::EffectSetting>(FormID::WarriorStone);
-			RE::EffectSetting* mageStone = RE::TESForm::LookupByID<RE::EffectSetting>(FormID::MageStone);
-			RE::EffectSetting* thiefStone = RE::TESForm::LookupByID<RE::EffectSetting>(FormID::ThiefStone);
+			auto warriorStone = RE::TESForm::LookupByID<RE::EffectSetting>(MGEF_WARRIOR_STONE);
+			auto mageStone = RE::TESForm::LookupByID<RE::EffectSetting>(MGEF_MAGE_STONE);
+			auto thiefStone = RE::TESForm::LookupByID<RE::EffectSetting>(MGEF_THIEF_STONE);
 
 			if (a->HasMagicEffect(warriorStone)) {
 				data.lvlHP += 1.0f;
@@ -190,11 +229,7 @@ namespace RaceLevelSystem
 			a->SetBaseActorValue(RE::ActorValue::kMagicka, mp);
 			a->SetBaseActorValue(RE::ActorValue::kStamina, st);
 
-			//resists
-			float vanillaResist = a->armorRating * SettingsData::fArmorRatingScalingFactor->data.f;
-			float magicResist = ArmorRescaled::ConvertDamageResist(vanillaResist) * 50.0f;
-
-			a->SetBaseActorValue(RE::ActorValue::kResistMagic, magicResist);
+			UpdateResist(a);			
 		});
 	}
 
@@ -224,159 +259,114 @@ namespace RaceLevelSystem
 		}
 	}
 
-	namespace Event
+	RE::BSEventNotifyControl OnActorAction(const SKSE::ActionEvent* e, RE::BSTEventSource<SKSE::ActionEvent>*)
 	{
-		class FastTravelEnd : public RE::BSTEventSink<RE::TESFastTravelEndEvent>
+		if (!e || !e->actor) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		if (e->type.any(SKSE::ActionEvent::Type::kBeginDraw, SKSE::ActionEvent::Type::kEndDraw))
 		{
-			using EventResult = RE::BSEventNotifyControl;
+			UpdateValues();
+		}
 
-			virtual EventResult ProcessEvent(const RE::TESFastTravelEndEvent* a_event, RE::BSTEventSource<RE::TESFastTravelEndEvent>*)
-			{
-				if (!a_event) {
-					return EventResult::kContinue;
-				}
+		return RE::BSEventNotifyControl::kContinue;
+	}
 
-				UpdateValues();
+	RE::BSEventNotifyControl OnFastTravelEnd(const RE::TESFastTravelEndEvent* e, RE::BSTEventSource<RE::TESFastTravelEndEvent>*)
+	{
+		if (e)
+			UpdateValues();
+		return RE::BSEventNotifyControl::kContinue;
+	}
 
-				return EventResult::kContinue;
+	RE::BSEventNotifyControl OnSwitchRaceComplete(const RE::TESSwitchRaceCompleteEvent* e, RE::BSTEventSource<RE::TESSwitchRaceCompleteEvent>*)
+	{
+		if (!e || !e->subject) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		UpdateValues();
+
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	RE::BSEventNotifyControl OnMagicEffectApply(const RE::TESMagicEffectApplyEvent* e, RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*)
+	{
+		if (!e || !e->target.get()->IsPlayerRef()) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+		UpdateValues();
+
+		//auto* mgef = RE::TESForm::LookupByID<RE::EffectSetting>(e->magicEffect);
+		//if (!mgef) {
+		//	return RE::BSEventNotifyControl::kContinue;
+		//}
+
+		//const char* name = mgef->GetFullName() ? mgef->GetFullName() : "None";
+		//const char* editorID = mgef->GetFormEditorID() ? mgef->GetFormEditorID() : "None";
+		//auto formID = mgef->GetFormID();
+
+		//SKSE::log::info("MGEF -> Name: {} | EditorID: {} | FormID: 0x{:08X}", name, editorID, formID);
+
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	RE::BSEventNotifyControl OnEquip(const RE::TESEquipEvent* e, RE::BSTEventSource<RE::TESEquipEvent>*)
+	{
+		if (!e || !e->actor || !e->actor->IsPlayerRef()) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		auto actor = e->actor.get()->As<RE::Actor>();
+
+		 SKSE::GetTaskInterface()->AddTask([actor]() {
+			UpdateResist(actor);
+
+			float armorRating = actor->GetActorValue(RE::ActorValue::kDamageResist);
+			float vanillaResist = armorRating * SettingsData::fArmorRatingScalingFactor->data.f;
+			float scaledResist = ArmorRescaled::ConvertDamageResist(vanillaResist) * 100.0f;
+			float magicResist = scaledResist / 2.0f;
+
+			auto console = RE::ConsoleLog::GetSingleton();
+			console->Print("=============================");
+			console->Print("ARMOR_RATING: %.0f", armorRating);
+			console->Print("VANILLA_RESIST: %.2f", vanillaResist);
+			console->Print("SCALED_RESIST: %.1f%%", scaledResist);
+			console->Print("MAGIC_RESIST: %.1f%%", magicResist);
+			console->Print("=============================");
+		});
+
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	RE::BSEventNotifyControl OnDeath(const RE::TESDeathEvent* e, RE::BSTEventSource<RE::TESDeathEvent>*)
+	{
+		if (!e || !e->actorDying) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		auto player = RE::PlayerCharacter::GetSingleton();
+
+		float exp = 0.0f;
+
+		if (e->actorKiller && e->actorKiller.get()->IsPlayerRef() && e->actorDying) {
+			RE::Actor* dyingActor = e->actorDying.get()->As<RE::Actor>();
+			RE::Actor* killerActor = e->actorKiller.get()->As<RE::Actor>();
+
+			if (dyingActor != killerActor) {
+				float playerlvl = player->GetLevel();
+				float actorlvl = dyingActor->GetLevel();
+				exp = actorlvl / playerlvl * actorlvl + 1.0f + actorlvl;
+				player->skills->data->xp += exp;
+
+				std::string message = fmt::format("{} {} lvl, +{} xp", dyingActor->GetName(), dyingActor->GetLevel(), (int)exp);
+
+				RE::DebugNotification(message.c_str());
 			}
+		}
 
-			static FastTravelEnd* GetSingleton()
-			{
-				static FastTravelEnd instance;
-				return &instance;
-			}
-
-		public:
-			static void Register()
-			{
-				if (auto source = RE::ScriptEventSourceHolder::GetSingleton()) {
-					source->AddEventSink(FastTravelEnd::GetSingleton());
-				}
-			}
-		};
-
-		class SwitchRaceComplete : public RE::BSTEventSink<RE::TESSwitchRaceCompleteEvent>
-		{
-			using EventResult = RE::BSEventNotifyControl;
-
-			virtual EventResult ProcessEvent(const RE::TESSwitchRaceCompleteEvent* a_event,	RE::BSTEventSource<RE::TESSwitchRaceCompleteEvent>*)
-			{
-				if (!a_event || !a_event->subject) {
-					return EventResult::kContinue;
-				}
-
-				UpdateValues();
-
-				return EventResult::kContinue;
-			}
-
-			static SwitchRaceComplete* GetSingleton()
-			{
-				static SwitchRaceComplete instance;
-				return &instance;
-			}
-
-		public:
-
-			static void Register()
-			{
-				if (auto source = RE::ScriptEventSourceHolder::GetSingleton()) {
-					source->AddEventSink(SwitchRaceComplete::GetSingleton());
-				}
-			}
-		};
-
-		class MagicEffectApply : public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
-		{
-			using EventResult = RE::BSEventNotifyControl;
-
-			virtual EventResult ProcessEvent(const RE::TESMagicEffectApplyEvent* a_event, RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*)
-			{
-				if (!a_event || !a_event->target.get()->IsPlayerRef())
-				{
-					return EventResult::kContinue;
-				}
-				UpdateValues();
-
-				//auto* mgef = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
-				//if (!mgef) {
-				//	return EventResult::kContinue;
-				//}
-
-				//const char* name = mgef->GetFullName() ? mgef->GetFullName() : "None";
-				//const char* editorID = mgef->GetFormEditorID() ? mgef->GetFormEditorID() : "None";
-				//auto formID = mgef->GetFormID();
-
-				//SKSE::log::info("MGEF -> Name: {} | EditorID: {} | FormID: 0x{:08X}", name, editorID, formID);
-
-				return EventResult::kContinue;
-			}
-
-			static MagicEffectApply* GetSingleton()
-			{
-				static MagicEffectApply instance;
-				return &instance;
-			}
-
-		public:
-			static void Register()
-			{
-				if (auto source = RE::ScriptEventSourceHolder::GetSingleton()) {
-					source->AddEventSink(MagicEffectApply::GetSingleton());
-				}
-			}
-		};
-
-		class Death : public RE::BSTEventSink<RE::TESDeathEvent>
-		{
-			using EventResult = RE::BSEventNotifyControl;
-
-			virtual EventResult ProcessEvent(const RE::TESDeathEvent* a_event, RE::BSTEventSource<RE::TESDeathEvent>*)
-			{
-				if (!a_event || !a_event->actorDying) {
-					return EventResult::kContinue;
-				}
-
-				auto player = RE::PlayerCharacter::GetSingleton();
-
-				float exp = 0.0f;
-
-				if (a_event->actorKiller && a_event->actorKiller.get()->IsPlayerRef() && a_event->actorDying) {
-					RE::Actor* dyingActor = a_event->actorDying.get()->As<RE::Actor>();
-					RE::Actor* killerActor = a_event->actorKiller.get()->As<RE::Actor>();
-
-					if (dyingActor != killerActor) {
-
-						float playerlvl = player->GetLevel();
-						float actorlvl = dyingActor->GetLevel();
-						exp = actorlvl / playerlvl * actorlvl + 1.0f + actorlvl;
-						player->skills->data->xp += exp;
-
-						std::string message = fmt::format("{} {} lvl, +{} xp", dyingActor->GetName(), dyingActor->GetLevel(), (int)exp);
-
-						RE::DebugNotification(message.c_str());
-					}
-				}
-
-				return EventResult::kContinue;
-			}
-
-			static Death* GetSingleton()
-			{
-				static Death instance;
-				return &instance;
-			}
-
-		public:
-
-			static void Register()
-			{
-				if (auto source = RE::ScriptEventSourceHolder::GetSingleton()) {
-					source->AddEventSink(Death::GetSingleton());
-				}
-			}
-		};
+		return RE::BSEventNotifyControl::kContinue;
 	}
 
 	namespace Hook
@@ -406,51 +396,16 @@ namespace RaceLevelSystem
 
 	void Initialize()
 	{
-		Event::FastTravelEnd::Register();
-		Event::SwitchRaceComplete::Register();
-		Event::MagicEffectApply::Register();
-		Event::Death::Register();
+		EventSink::Register(OnActorAction);
+		EventSink::Register(OnFastTravelEnd);
+		EventSink::Register(OnSwitchRaceComplete);
+		//EventSink::Register(OnMagicEffectApply);
+		EventSink::Register(OnEquip);
+		EventSink::Register(OnDeath);
 
 		Hook::LevelUpMenu::Install();
 	}
 };
-
-namespace Event
-{
-	class ActorAction : public RE::BSTEventSink<SKSE::ActionEvent>
-	{
-		virtual RE::BSEventNotifyControl ProcessEvent(const SKSE::ActionEvent* a_event,
-			RE::BSTEventSource<SKSE::ActionEvent>*) override
-		{
-			if (!a_event || !a_event->actor) {
-				return RE::BSEventNotifyControl::kContinue;
-			}
-
-			//if (a_event->type.any(SKSE::ActionEvent::Type::kSpellCast))
-			//{
-			//	RE::ConsoleLog::GetSingleton()->Print("proc SpellCast");
-			//}
-
-			return RE::BSEventNotifyControl::kContinue;
-		}
-
-		static ActorAction* GetSingleton()
-		{
-			static ActorAction instance;
-			return &instance;
-		}
-
-	public:
-		static void Register()
-		{
-			if (auto source = SKSE::GetActionEventSource()) {
-				source->AddEventSink(ActorAction::GetSingleton());
-			}
-		}
-	};
-
-	void Initialize() { ActorAction::Register(); }
-}
 
 namespace VirtualHook
 {
@@ -508,6 +463,8 @@ namespace Hook
 	{
 		static void ActorRegeneration(RE::Actor* a, float dt)
 		{
+			//todo: base race regenerate numeric exam: regenHP 0.5, regenMP 1.25, regenST: 1.75, formula: result = (stat * percentRegen) + raceRegen * statRate
+			
 			const float fixVal = 0.01f;
 
 			float hp = a->GetBaseActorValue(RE::ActorValue::kHealth);
@@ -530,6 +487,8 @@ namespace Hook
 		static void RestoreActorValue(RE::Actor* a, RE::ActorValue av, float dt)
 		{
 			ActorRegeneration(a, dt);
+
+			//todo: decrease costs sprinting, swimming and other
 
 			if (a->actorState1.sprinting)
 			{				
@@ -585,7 +544,7 @@ namespace Hook
 		static float get_damage(void* _weap, RE::ActorValueOwner* a, float DamageMult, char isbow)
 		{
 			if (a->GetActorValue(RE::ActorValue::kStamina) < 32.0f) {
-				return _get_damage(_weap, a, DamageMult, isbow) * 0.75f;
+				return _get_damage(_weap, a, DamageMult, isbow) * 0.6f;
 			}
 			return _get_damage(_weap, a, DamageMult, isbow);
 		}
@@ -779,6 +738,25 @@ namespace ArmorRescaled
 	}
 }
 
+namespace Rebalance
+{
+	void weap_Install()
+	{
+		RE::TESDataHandler* dataHandler = RE::TESDataHandler::GetSingleton();
+		if (!dataHandler)
+			return;
+
+		for (auto form : dataHandler->GetFormArray(RE::FormType::Weapon)) {
+			form->As<RE::TESObjectWEAP>()->attackDamage *= 3;
+		}
+	}
+
+	void Initialize()
+	{
+		weap_Install();
+	}
+}
+
 static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 {
 	switch (message->type) {
@@ -791,13 +769,13 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 	
 	case SKSE::MessagingInterface::kDataLoaded:
 
+		Rebalance::Initialize();
+
 		SettingsData::Initialize();
 
 		ArmorRescaled::Initialize();
 
 		RaceLevelSystem::Initialize();
-
-		Event::Initialize();
 
 		VirtualHook::Initialize();
 
