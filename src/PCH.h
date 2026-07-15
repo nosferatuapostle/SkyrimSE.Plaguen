@@ -5,6 +5,8 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 
+#include <xbyak/xbyak.h>
+
 #pragma warning(push)
 #ifdef DEBUG
 #	include <spdlog/sinks/basic_file_sink.h>
@@ -20,6 +22,3 @@ namespace logger = SKSE::log;
 #define DLLEXPORT __declspec(dllexport)
 
 #include "Version.h"
-#ifdef USELESS_UTILS
-#	include "UselessFenixUtils.h"
-#endif

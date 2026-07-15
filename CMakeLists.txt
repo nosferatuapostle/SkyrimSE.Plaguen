@@ -67,10 +67,6 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 set(Boost_USE_STATIC_LIBS ON)
 
-if (DEFINED UseUselessUtils AND UseUselessUtils)
-	add_compile_definitions(USELESS_UTILS)
-endif ()
-
 
 # ---- Dependencies ----
 
