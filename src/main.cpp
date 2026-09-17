@@ -429,9 +429,7 @@ namespace Hook
 	class RestoreAV
 	{
 		static void ActorRegeneration(RE::Actor* a, float dt)
-		{
-			//todo: base race regenerate numeric exam: regenHP 0.5, regenMP 1.25, regenST: 1.75, formula: result = (stat * percentRegen) + raceRegen * statRate
-			
+		{	
 			const float fixVal = 0.01f;
 
 			float hp = a->GetBaseActorValue(RE::ActorValue::kHealth);
@@ -630,8 +628,6 @@ namespace Hook
 		AttackCostStamina::Install();
 	}
 }
-
-
 
 namespace ArmorRescaled
 {
