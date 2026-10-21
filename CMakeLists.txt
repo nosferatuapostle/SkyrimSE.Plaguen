@@ -145,7 +145,7 @@ if (MSVC)
 	target_compile_options(
 		${PROJECT_NAME}
 		PRIVATE
-      /std:c17
+			/std:c17
       
 			/sdl	# Enable Additional Security Checks
 			/utf-8	# Set Source and Executable character sets to UTF-8

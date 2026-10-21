@@ -55,32 +55,97 @@ namespace RE
 	}
 }
 
-static float BONUS_RESIST = 0.0f;
-
-namespace SettingsData
+namespace GameSettings
 {
 	auto GSC = RE::GameSettingCollection::GetSingleton();
-	auto fArmorRatingScalingFactor = GSC->GetSetting("fArmorScalingFactor");
-	auto fMaxArmorRating = GSC->GetSetting("fMaxArmorRating");
-	auto fSprintStaminaDrainMult = GSC->GetSetting("fSprintStaminaDrainMult");
+	
+	RE::Setting* fDiffMultHPByPCVE = GSC->GetSetting("fDiffMultHPByPCVE");
+	RE::Setting* fDiffMultHPByPCE = GSC->GetSetting("fDiffMultHPByPCE");
+	RE::Setting* fDiffMultHPByPCN = GSC->GetSetting("fDiffMultHPByPCN");
+	RE::Setting* fDiffMultHPByPCH = GSC->GetSetting("fDiffMultHPByPCH");
+	RE::Setting* fDiffMultHPByPCVH = GSC->GetSetting("fDiffMultHPByPCVH");
+	RE::Setting* fDiffMultHPByPCL = GSC->GetSetting("fDiffMultHPByPCL");
+	
+	RE::Setting* fDiffMultHPToPCVE = GSC->GetSetting("fDiffMultHPToPCVE");
+	RE::Setting* fDiffMultHPToPCE = GSC->GetSetting("fDiffMultHPToPCE");
+	RE::Setting* fDiffMultHPToPCN = GSC->GetSetting("fDiffMultHPToPCN");
+	RE::Setting* fDiffMultHPToPCH = GSC->GetSetting("fDiffMultHPToPCH");
+	RE::Setting* fDiffMultHPToPCVH = GSC->GetSetting("fDiffMultHPToPCVH");
+	RE::Setting* fDiffMultHPToPCL = GSC->GetSetting("fDiffMultHPToPCL");
+
+	RE::Setting* fArmorRatingScalingFactor = GSC->GetSetting("fArmorScalingFactor");
+	RE::Setting* fMaxArmorRating = GSC->GetSetting("fMaxArmorRating");
+
+	RE::Setting* fPlayerMaxResistance = GSC->GetSetting("fPlayerMaxResistance");
+
+	RE::Setting* fXPPerSkillRank = GSC->GetSetting("fXPPerSkillRank");
+	RE::Setting* fXPLevelUpBase = GSC->GetSetting("fXPLevelUpBase");
+	RE::Setting* fXPLevelUpMult = GSC->GetSetting("fXPLevelUpMult");
+
+	RE::Setting* iTrainingNumAllowedPerLevel = GSC->GetSetting("iTrainingNumAllowedPerLevel");
+
+	RE::Setting* fCombatDistance = GSC->GetSetting("fCombatDistance");
+	RE::Setting* fCombatMagickaRegenRateMult = GSC->GetSetting("fCombatMagickaRegenRateMult");
+	RE::Setting* fCombatStaminaRegenRateMult = GSC->GetSetting("fCombatStaminaRegenRateMult");
+
+	RE::Setting* fDamagePCSkillMax = GSC->GetSetting("fDamagePCSkillMax");
+	RE::Setting* fDamagePCSkillMin = GSC->GetSetting("fDamagePCSkillMin");
+
+	RE::Setting* fDamageSkillMax = GSC->GetSetting("fDamageSkillMax");
+	RE::Setting* fDamageSkillMin = GSC->GetSetting("fDamageSkillMin");
+
+	RE::Setting* fSprintStaminaDrainMult = GSC->GetSetting("fSprintStaminaDrainMult");
+
+	RE::Setting* fStaminaAttackWeaponBase = GSC->GetSetting("fStaminaAttackWeaponBase");
+	RE::Setting* fStaminaAttackWeaponMult = GSC->GetSetting("fStaminaAttackWeaponMult");
+
+	RE::Setting* fActorSwimBreathBase = GSC->GetSetting("fActorSwimBreathBase");
+	RE::Setting* fActorSwimBreathDamage = GSC->GetSetting("fActorSwimBreathDamage");
 
 	void Initialize()
 	{
-		fMaxArmorRating->data.f = 100.0f;
+		fDiffMultHPByPCVE->data.f = 1.5f;
+		fDiffMultHPByPCE->data.f = 1.25f;
+		fDiffMultHPByPCN->data.f = 1.0f;
+		fDiffMultHPByPCH->data.f = 0.75f;
+		fDiffMultHPByPCVH->data.f = 0.5f;
+		fDiffMultHPByPCL->data.f = 0.25f;
+
+		fDiffMultHPToPCVE->data.f = 0.5f;
+		fDiffMultHPToPCE->data.f = 1.0f;
+		fDiffMultHPToPCN->data.f = 1.5f;
+		fDiffMultHPToPCH->data.f = 2.0f;
+		fDiffMultHPToPCVH->data.f = 2.5f;
+		fDiffMultHPToPCL->data.f = 3.0f;
+
+		fArmorRatingScalingFactor->data.f = 0.0f;
+		fMaxArmorRating->data.f = 0.0f;
+
+		fPlayerMaxResistance->data.f = 100.0f;
+
+		fXPPerSkillRank->data.f = 1.0f;
+		fXPLevelUpBase->data.f = 75.0f;
+		fXPLevelUpMult->data.f = 25.0f;
+
+		iTrainingNumAllowedPerLevel->data.i = 2;
+
+		fCombatDistance->data.f = 100.0f;
+		fCombatMagickaRegenRateMult->data.f = 0.0f;
+		fCombatStaminaRegenRateMult->data.f = 0.0f;
+
+		fDamagePCSkillMax->data.f = 2.0f;
+		fDamagePCSkillMin->data.f = 1.0f;
+		
+		fDamageSkillMax->data.f = 4.0f;
+		fDamageSkillMin->data.f = 1.0f;
+
 		fSprintStaminaDrainMult->data.f = 0.0f;
-	}
-}
 
-namespace ArmorRescaled
-{
-	constexpr float kScale = 40.0f;
+		fStaminaAttackWeaponBase->data.f = 0.0f;
+		fStaminaAttackWeaponMult->data.f = 0.0f;
 
-	static inline float ConvertDamageResist(float vanillaResist)
-	{
-		if (vanillaResist <= 0.0f)
-			return 0.0f;
-
-		return vanillaResist / (vanillaResist + kScale) + BONUS_RESIST;
+		fActorSwimBreathBase->data.f = 15.0f;
+		fActorSwimBreathDamage->data.f = 0.08f;
 	}
 }
 
@@ -141,12 +206,14 @@ constexpr RE::FormID RACE_NORD_VAMPIRE = 558996;
 constexpr RE::FormID RACE_ORC_VAMPIRE = 688825;
 constexpr RE::FormID RACE_REDGUARD_VAMPIRE = 559174;
 constexpr RE::FormID RACE_WOODELF_VAMPIRE = 559236;
+constexpr RE::FormID RACE_VAMPIRE_BEAST = 10298;
+constexpr RE::FormID RACE_WEREWOLF_BEAST = 843140;
 
 struct Stats
 {
-	float hp;
-	float mp;
-	float st;
+	float hp{};
+	float mp{};
+	float st{};
 };
 
 struct RaceData
@@ -155,47 +222,97 @@ struct RaceData
 	Stats growth;
 };
 
-const std::unordered_map<RE::FormID, RaceData> RACE_DATA = { 
-	{ RACE_ARGONIAN,{ { 115.0f, 75.0f, 110.0f }, { 4.0f, 2.0f, 4.0f } } },
-	{ RACE_BRETON, { { 90.0f, 115.0f, 95.0f }, { 2.0f, 5.0f, 3.0f } } },
-	{ RACE_DARKELF, { { 105.0f, 105.0f, 105.0f }, { 3.0f, 3.0f, 3.0f } } },
-	{ RACE_HIGHELF, { { 85.0f, 125.0f, 90.0f }, { 2.0f, 7.0f, 2.0f } } },
-	{ RACE_IMPERIAL, { { 110.0f, 80.0f, 110.0f }, { 4.0f, 2.0f, 4.0f } } },
-	{ RACE_KHAJIIT, { { 100.0f, 75.0f, 125.0f }, { 3.0f, 2.0f, 6.0f } } },
-	{ RACE_NORD, { { 120.0f, 70.0f, 110.0f }, { 5.0f, 1.0f, 4.0f } } },
-	{ RACE_ORC, { { 125.0f, 60.0f, 115.0f }, { 6.0f, 1.0f, 4.0f } } },
-	{ RACE_REDGUARD, { { 115.0f, 65.0f, 120.0f }, { 4.0f, 1.0f, 5.0f } } },
-	{ RACE_WOODELF, { { 95.0f, 90.0f, 115.0f }, { 2.0f, 3.0f, 5.0f } } },
-
-	{ RACE_ARGONIAN_VAMPIRE, { { 115.0f, 75.0f, 110.0f }, { 5.0f, 3.0f, 5.0f } } },
-	{ RACE_BRETON_VAMPIRE, { { 90.0f, 115.0f, 95.0f }, { 3.0f, 6.0f, 4.0f } } },
-	{ RACE_DARKELF_VAMPIRE, { { 105.0f, 105.0f, 105.0f }, { 4.0f, 4.0f, 4.0f } } },
-	{ RACE_HIGHELF_VAMPIRE, { { 85.0f, 125.0f, 90.0f }, { 3.0f, 8.0f, 3.0f } } },
-	{ RACE_IMPERIAL_VAMPIRE, { { 110.0f, 80.0f, 110.0f }, { 5.0f, 3.0f, 5.0f } } },
-	{ RACE_KHAJIIT_VAMPIRE, { { 100.0f, 75.0f, 125.0f }, { 4.0f, 3.0f, 7.0f } } },
-	{ RACE_NORD_VAMPIRE, { { 120.0f, 70.0f, 110.0f }, { 6.0f, 2.0f, 5.0f } } },
-	{ RACE_ORC_VAMPIRE, { { 125.0f, 60.0f, 115.0f }, { 7.0f, 2.0f, 5.0f } } },
-	{ RACE_REDGUARD_VAMPIRE, { { 115.0f, 65.0f, 120.0f }, { 5.0f, 2.0f, 6.0f } } },
-	{ RACE_WOODELF_VAMPIRE, { { 95.0f, 90.0f, 115.0f }, { 3.0f, 5.0f, 6.0f } } }
-};
-
-static RaceData GetBaseValues(RE::TESRace* race)
+static bool TryGetBaseValues(RE::TESRace* race, RaceData& outData)
 {
-	RaceData data{};
+	if (!race)
+		return false;
 
-	auto it = RACE_DATA.find(race->GetFormID());
+	const RE::FormID id = race->GetFormID() & 0x00FFFFFF;
 
-	if (it != RACE_DATA.end()) {
-		data = it->second;
+	switch (id) {
+	case RACE_ARGONIAN:
+		outData = { { 115.0f, 75.0f, 110.0f }, { 4.0f, 2.0f, 4.0f } };
+		return true;
+	case RACE_BRETON:
+		outData = { { 90.0f, 115.0f, 95.0f }, { 2.0f, 5.0f, 3.0f } };
+		return true;
+	case RACE_DARKELF:
+		outData = { { 105.0f, 105.0f, 105.0f }, { 3.0f, 3.0f, 3.0f } };
+		return true;
+	case RACE_HIGHELF:
+		outData = { { 85.0f, 125.0f, 90.0f }, { 2.0f, 7.0f, 2.0f } };
+		return true;
+	case RACE_IMPERIAL:
+		outData = { { 110.0f, 80.0f, 110.0f }, { 4.0f, 2.0f, 4.0f } };
+		return true;
+	case RACE_KHAJIIT:
+		outData = { { 100.0f, 75.0f, 125.0f }, { 3.0f, 2.0f, 6.0f } };
+		return true;
+	case RACE_NORD:
+		outData = { { 120.0f, 70.0f, 110.0f }, { 5.0f, 1.0f, 4.0f } };
+		return true;
+	case RACE_ORC:
+		outData = { { 125.0f, 60.0f, 115.0f }, { 6.0f, 1.0f, 4.0f } };
+		return true;
+	case RACE_REDGUARD:
+		outData = { { 115.0f, 65.0f, 120.0f }, { 4.0f, 1.0f, 5.0f } };
+		return true;
+	case RACE_WOODELF:
+		outData = { { 95.0f, 90.0f, 115.0f }, { 2.0f, 3.0f, 5.0f } };
+		return true;
+
+	case RACE_ARGONIAN_VAMPIRE:
+		outData = { { 115.0f, 75.0f, 110.0f }, { 5.0f, 3.0f, 5.0f } };
+		return true;
+	case RACE_BRETON_VAMPIRE:
+		outData = { { 90.0f, 115.0f, 95.0f }, { 3.0f, 6.0f, 4.0f } };
+		return true;
+	case RACE_DARKELF_VAMPIRE:
+		outData = { { 105.0f, 105.0f, 105.0f }, { 4.0f, 4.0f, 4.0f } };
+		return true;
+	case RACE_HIGHELF_VAMPIRE:
+		outData = { { 85.0f, 125.0f, 90.0f }, { 3.0f, 8.0f, 3.0f } };
+		return true;
+	case RACE_IMPERIAL_VAMPIRE:
+		outData = { { 110.0f, 80.0f, 110.0f }, { 5.0f, 3.0f, 5.0f } };
+		return true;
+	case RACE_KHAJIIT_VAMPIRE:
+		outData = { { 100.0f, 75.0f, 125.0f }, { 4.0f, 3.0f, 7.0f } };
+		return true;
+	case RACE_NORD_VAMPIRE:
+		outData = { { 120.0f, 70.0f, 110.0f }, { 6.0f, 2.0f, 5.0f } };
+		return true;
+	case RACE_ORC_VAMPIRE:
+		outData = { { 125.0f, 60.0f, 115.0f }, { 7.0f, 2.0f, 5.0f } };
+		return true;
+	case RACE_REDGUARD_VAMPIRE:
+		outData = { { 115.0f, 65.0f, 120.0f }, { 5.0f, 2.0f, 6.0f } };
+		return true;
+	case RACE_WOODELF_VAMPIRE:
+		outData = { { 95.0f, 90.0f, 115.0f }, { 3.0f, 5.0f, 6.0f } };
+		return true;
+
+	case RACE_VAMPIRE_BEAST:
+		outData = { { 350.0f, 300.0f, 350.0f }, { 10.0f, 10.0f, 10.0f } };
+		return true;
+	case RACE_WEREWOLF_BEAST:
+		outData = { { 500.0f, 0.0f, 500.0f }, { 15.0f, 0.0f, 15.0f } };
+		return true;
+
+	default:
+		return false;
 	}
-
-	return data;
 }
 
 static void UpdateValues(const std::string debugMessage = "")
 {
 	auto player = RE::PlayerCharacter::GetSingleton();
-	auto data = GetBaseValues(player->race);
+
+	RaceData data;
+	if (!TryGetBaseValues(player->race, data)) {
+		SKSE::log::warn("Unknown race 0x{:08X}, skipping stat update.", player->race->formID);
+		return;
+	}
 
 	auto warriorStone = RE::TESForm::LookupByID<RE::EffectSetting>(MGEF_WARRIOR_STONE);
 	auto mageStone = RE::TESForm::LookupByID<RE::EffectSetting>(MGEF_MAGE_STONE);
@@ -211,7 +328,9 @@ static void UpdateValues(const std::string debugMessage = "")
 
 	auto level = player->GetLevel();
 
-	float hp = data.base.hp + (level - 1) * data.growth.hp;
+	float damageResist = player->GetActorValueMax(RE::ActorValue::kDamageResist);
+
+	float hp = data.base.hp + (level - 1) * data.growth.hp + damageResist;
 	float mp = data.base.mp + (level - 1) * data.growth.mp;
 	float st = data.base.st + (level - 1) * data.growth.st;
 
@@ -219,14 +338,11 @@ static void UpdateValues(const std::string debugMessage = "")
 	float oldMP = player->GetBaseActorValue(RE::ActorValue::kMagicka);
 	float oldST = player->GetBaseActorValue(RE::ActorValue::kStamina);
 
+	player->ModBaseActorValue(RE::ActorValue::kHealth, (level - 1) * data.growth.hp);
+
 	player->SetBaseActorValue(RE::ActorValue::kHealth, hp);
 	player->SetBaseActorValue(RE::ActorValue::kMagicka, mp);
 	player->SetBaseActorValue(RE::ActorValue::kStamina, st);
-
-	float vanillaResist = player->armorRating * SettingsData::fArmorRatingScalingFactor->data.f;
-	float magicResist = ArmorRescaled::ConvertDamageResist(vanillaResist) * 50.0f;
-
-	player->SetBaseActorValue(RE::ActorValue::kResistMagic, magicResist);
 
 	if (!debugMessage.empty())
 	{
@@ -241,7 +357,46 @@ static void UpdateValues(const std::string debugMessage = "")
 
 namespace Event
 {
-	RE::BSEventNotifyControl OnActorAction(const SKSE::ActionEvent* e, RE::BSTEventSource<SKSE::ActionEvent>*)
+	static RE::BSEventNotifyControl OnCellAttachDetach(const RE::TESCellAttachDetachEvent* e,
+		RE::BSTEventSource<RE::TESCellAttachDetachEvent>*)
+	{
+		if (!e || !e->attached) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		auto* reference = e->reference.get();
+
+		if (!reference) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		auto* actor = reference->As<RE::Actor>();
+
+		if (!actor || actor->IsPlayerRef()) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		//auto& referenceToProcess = e->reference;
+
+		//if (auto* taskInterface = SKSE::GetTaskInterface()) {
+		//	taskInterface->AddTask([referenceToProcess]() {
+		//		auto* ref = referenceToProcess.get();
+
+		//		if (!ref) {
+		//			return;
+		//		}
+
+		//		if (auto* attachedActor = ref->As<RE::Actor>()) {
+		//			auto maxHealth = attachedActor->GetBaseActorValue(RE::ActorValue::kHealth);
+		//			attachedActor->SetBaseActorValue(RE::ActorValue::kHealth, maxHealth * 5);
+		//		}
+		//	});
+		//}
+
+		return RE::BSEventNotifyControl::kContinue;
+	}
+
+	static RE::BSEventNotifyControl OnActorAction(const SKSE::ActionEvent* e, RE::BSTEventSource<SKSE::ActionEvent>*)
 	{
 		if (!e->actor->IsPlayerRef()) {
 			return RE::BSEventNotifyControl::kContinue;
@@ -254,14 +409,14 @@ namespace Event
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl OnFastTravelEnd(const RE::TESFastTravelEndEvent*, RE::BSTEventSource<RE::TESFastTravelEndEvent>*)
+	static RE::BSEventNotifyControl OnFastTravelEnd(const RE::TESFastTravelEndEvent*, RE::BSTEventSource<RE::TESFastTravelEndEvent>*)
 	{
 		UpdateValues("FAST TRAVEL END");
 
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl OnSwitchRaceComplete(const RE::TESSwitchRaceCompleteEvent*,
+	static RE::BSEventNotifyControl OnSwitchRaceComplete(const RE::TESSwitchRaceCompleteEvent*,
 		RE::BSTEventSource<RE::TESSwitchRaceCompleteEvent>*)
 	{
 		UpdateValues("SWITCH RACE COMPLETE");
@@ -269,65 +424,49 @@ namespace Event
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl OnMagicEffectApply(const RE::TESMagicEffectApplyEvent* e,
+	static RE::BSEventNotifyControl OnMagicEffectApply(const RE::TESMagicEffectApplyEvent* e,
 		RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*)
 	{
 		if (!e->target.get()->IsPlayerRef()) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		//UpdateValues();
 
-		//auto* mgef = RE::TESForm::LookupByID<RE::EffectSetting>(e->magicEffect);
-		//if (!mgef) {
-		//	return RE::BSEventNotifyControl::kContinue;
-		//}
-
+		auto* mgef = RE::TESForm::LookupByID<RE::EffectSetting>(e->magicEffect);
+		if (!mgef) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
 		//const char* name = mgef->GetFullName() ? mgef->GetFullName() : "None";
 		//const char* editorID = mgef->GetFormEditorID() ? mgef->GetFormEditorID() : "None";
 		//auto formID = mgef->GetFormID();
-
 		//SKSE::log::info("MGEF -> Name: {} | EditorID: {} | FormID: 0x{:08X}", name, editorID, formID);
+
+		if (mgef->HasKeywordByEditorID("UpdateValues")) {
+			UpdateValues();
+		}
 
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl OnEquip(const RE::TESEquipEvent* e, RE::BSTEventSource<RE::TESEquipEvent>*)
+	static RE::BSEventNotifyControl OnEquip(const RE::TESEquipEvent* e, RE::BSTEventSource<RE::TESEquipEvent>*)
 	{
 		if (!e || !e->actor || !e->actor->IsPlayerRef()) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		//auto actor = e->actor.get()->As<RE::Actor>();
-
 		SKSE::GetTaskInterface()->AddTask([]() {
 			UpdateValues("EQUIP");
-
-			/*float armorRating = actor->GetActorValue(RE::ActorValue::kDamageResist);
-			float vanillaResist = armorRating * SettingsData::fArmorRatingScalingFactor->data.f;
-			float scaledResist = ArmorRescaled::ConvertDamageResist(vanillaResist) * 100.0f;
-			float magicResist = scaledResist / 2.0f;
-
-			auto console = RE::ConsoleLog::GetSingleton();
-			console->Print("=============================");
-			console->Print("ARMOR_RATING: %.0f", armorRating);
-			console->Print("VANILLA_RESIST: %.2f", vanillaResist);
-			console->Print("SCALED_RESIST: %.1f%%", scaledResist);
-			console->Print("MAGIC_RESIST: %.1f%%", magicResist);
-			console->Print("=============================");*/
 		});
 
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl OnDeath(const RE::TESDeathEvent* e, RE::BSTEventSource<RE::TESDeathEvent>*)
+	static RE::BSEventNotifyControl OnDeath(const RE::TESDeathEvent* e, RE::BSTEventSource<RE::TESDeathEvent>*)
 	{
 		if (!e || !e->actorDying) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
 		auto player = RE::PlayerCharacter::GetSingleton();
-
-		float exp = 0.0f;
 
 		if (e->actorKiller && e->actorKiller.get()->IsPlayerRef() && e->actorDying) {
 			RE::Actor* dyingActor = e->actorDying.get()->As<RE::Actor>();
@@ -336,10 +475,10 @@ namespace Event
 			if (dyingActor != killerActor) {
 				float playerlvl = player->GetLevel();
 				float actorlvl = dyingActor->GetLevel();
-				exp = actorlvl / playerlvl * actorlvl + 1.0f + actorlvl;
+				float exp = actorlvl / playerlvl * actorlvl + 1.0f + actorlvl;
 				player->skills->data->xp += exp;
 
-				std::string message = fmt::format("{} {} lvl, +{} xp", dyingActor->GetName(), dyingActor->GetLevel(), (int)exp);
+				std::string message = fmt::format("{} {} lvl, +{}xp", dyingActor->GetName(), dyingActor->GetLevel(), (int)exp);
 
 				RE::DebugNotification(message.c_str());
 			}
@@ -348,12 +487,13 @@ namespace Event
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	void Initialize()
+	static void Initialize()
 	{
+		EventSink::Register(OnCellAttachDetach);
 		EventSink::Register(OnActorAction);
 		EventSink::Register(OnFastTravelEnd);
 		EventSink::Register(OnSwitchRaceComplete);
-		//EventSink::Register(OnMagicEffectApply);
+		EventSink::Register(OnMagicEffectApply);
 		EventSink::Register(OnEquip);
 		EventSink::Register(OnDeath);
 	}
@@ -402,8 +542,10 @@ namespace VirtualHook
 		static void Install() { _Update = REL::Relocation<uintptr_t>(RE::VTABLE_PlayerCharacter[0]).write_vfunc(0xAD, Update); }
 	};
 
-	void Initialize()
+	static void Initialize()
 	{
+		//ArmorHealth::Install();
+
 		//ArrowGravity::Install();
 		//PlayerUpdate::Install();
 	}
@@ -411,8 +553,6 @@ namespace VirtualHook
 
 namespace Hook
 {
-	// todo:
-	// change global variables (xp formula)
 	class LevelUpMenu
 	{
 		static void thunk()
@@ -426,19 +566,103 @@ namespace Hook
 		static void Install() { SKSE::GetTrampoline().write_call<5>(REL::ID(51638).address() + 0xf8e, &thunk); }
 	};
 
-	class RestoreAV
+	class Training
+	{
+	private:
+		struct MiscStat
+		{
+			const char* name;
+			const char* additionalName;
+			std::uint32_t value;
+			std::uint32_t additionalValue;
+			std::uint8_t category;
+		};
+
+		inline static RE::Setting* trainingNumAllowedPerLevelSetting = nullptr;
+		inline static std::uint32_t baseTrainingNumAllowedPerLevel = 0;
+		inline static RE::UI::Create_t* originalCreateTrainingMenu = nullptr;
+
+		static std::optional<std::uint32_t> GetTrainingSessions()
+		{
+			static REL::Relocation<const RE::BSTArray<MiscStat>*> stats{ RELOCATION_ID(514503, 400662) };
+			if (!stats->data()) {
+				return std::nullopt;
+			}
+			for (const auto& stat : *stats) {
+				if (stat.name && ::_stricmp(stat.name, "Training Sessions") == 0) {
+					return stat.value;
+				}
+			}
+			return std::nullopt;
+		}
+
+		static std::uint32_t CalculateTrainingLimit
+		(std::uint32_t baseLimit, std::uint32_t level, std::uint32_t trainingSessions,
+			std::uint32_t skillTrainingsThisLevel)
+		{
+			const auto earned = static_cast<std::uint64_t>(level) * baseLimit;
+			const auto spentBeforeLevel =
+				trainingSessions > skillTrainingsThisLevel ? trainingSessions - skillTrainingsThisLevel : 0;
+			const auto remaining = earned > spentBeforeLevel ? earned - spentBeforeLevel : 0;
+			const auto limit = std::max(remaining, static_cast<std::uint64_t>(skillTrainingsThisLevel));
+			return static_cast<std::uint32_t>(std::min(limit, std::uint64_t{ std::numeric_limits<std::int32_t>::max() }));
+		}
+
+		static void UpdateTrainingLimit()
+		{
+			const auto* player = RE::PlayerCharacter::GetSingleton();
+			const auto trainingSessions = GetTrainingSessions();
+			if (!player || !trainingSessions) {
+				SKSE::log::error("Cannot read player training data");
+				return;
+			}
+			trainingNumAllowedPerLevelSetting->data.i = static_cast<std::int32_t>(CalculateTrainingLimit(
+				baseTrainingNumAllowedPerLevel, player->GetLevel(), *trainingSessions, player->skillTrainingsThisLevel));
+		}
+
+		static RE::IMenu* CreateTrainingMenu()
+		{
+			UpdateTrainingLimit();
+			return originalCreateTrainingMenu();
+		}
+
+	public:
+		static void Install()
+		{
+			//auto* settings = RE::GameSettingCollection::GetSingleton();
+			//auto* setting = settings ? settings->GetSetting("iTrainingNumAllowedPerLevel") : nullptr;
+			auto* setting = GameSettings::iTrainingNumAllowedPerLevel;
+			auto* ui = RE::UI::GetSingleton();
+			if (!ui) {
+				SKSE::log::error("Cannot initialize training");
+				return;
+			}
+			const auto entry = ui->menuMap.find(RE::TrainingMenu::MENU_NAME);
+			if (entry == ui->menuMap.end() || !entry->second.create) {
+				SKSE::log::error("Training menu is not available");
+				return;
+			}
+
+			baseTrainingNumAllowedPerLevel = static_cast<std::uint32_t>(std::max(setting->data.i, 0));
+			trainingNumAllowedPerLevelSetting = setting;
+			originalCreateTrainingMenu = entry->second.create;
+			entry->second.create = CreateTrainingMenu;
+		}
+	};
+
+	class UpdateAV
 	{
 		static void ActorRegeneration(RE::Actor* a, float dt)
 		{	
 			const float fixVal = 0.01f;
 
-			float hp = a->GetBaseActorValue(RE::ActorValue::kHealth);
-			float mp = a->GetBaseActorValue(RE::ActorValue::kMagicka);
-			float st = a->GetBaseActorValue(RE::ActorValue::kStamina);
+			float hp = a->GetActorValueMax(RE::ActorValue::kHealth);
+			float mp = a->GetActorValueMax(RE::ActorValue::kMagicka);
+			float st = a->GetActorValueMax(RE::ActorValue::kStamina);
 
-			float hpRate = a->GetBaseActorValue(RE::ActorValue::kHealRateMult) * fixVal;
-			float mpRate = a->GetBaseActorValue(RE::ActorValue::kMagickaRateMult) * fixVal;
-			float stRate = a->GetBaseActorValue(RE::ActorValue::kStaminaRateMult) * fixVal;
+			float hpRate = a->GetActorValueMax(RE::ActorValue::kHealRateMult) * fixVal;
+			float mpRate = a->GetActorValueMax(RE::ActorValue::kMagickaRateMult) * fixVal;
+			float stRate = a->GetActorValueMax(RE::ActorValue::kStaminaRateMult) * fixVal;
 
 			float hpRegen = (hp * 0.01f) * hpRate;
 			float mpRegen = (mp * 0.025f) * mpRate;
@@ -449,47 +673,59 @@ namespace Hook
 			a->RestoreActorValue(RE::ActorValue::kStamina, stRegen * dt);
 		}
 
-		static void RestoreActorValue(RE::Actor* a, RE::ActorValue av, float dt)
+		static void update_RegenDelay(RE::Actor* a, RE::ActorValue av, float dt)
 		{
 			ActorRegeneration(a, dt);
-
-			//todo: decrease costs sprinting, swimming and other
 			
 			if (a->IsPlayerRef() && a->As<RE::PlayerCharacter>()->IsGodMode()) {
-				_RestoreActorValue(a, av, dt);
+				_update_RegenDelay(a, av, dt);
 				return;
 			}
 
+			float stCost = 0;
+
 			if (a->actorState1.sprinting) {
-				a->DamageActorValue(RE::ActorValue::kStamina, (8 + a->equippedWeight * 0.2f) * dt);
+				stCost = (4 + a->equippedWeight * 0.2f);
+				a->DamageActorValue(RE::ActorValue::kStamina, stCost * dt);
+			} else if (a->actorState1.running) {
+				stCost = (2 + a->equippedWeight * 0.1f);
+				a->DamageActorValue(RE::ActorValue::kStamina, stCost * dt);
 			} else if (a->actorState1.meleeAttackState == RE::ATTACK_STATE_ENUM::kBowDrawn) {
-				a->DamageActorValue(RE::ActorValue::kStamina, 15 * dt);
+				stCost = 20;
+
+				auto overdrawPerk = RE::TESForm::LookupByID<RE::BGSPerk>(0x000BABED);
+				if (overdrawPerk && a->HasPerk(overdrawPerk)) {
+					stCost = 10;
+				}
+
+				a->DamageActorValue(RE::ActorValue::kStamina, stCost * dt);
 			} else if (a->actorState1.swimming) {
-				a->DamageActorValue(RE::ActorValue::kStamina, (10 + a->equippedWeight * 0.25f) * dt);
+				stCost = (1 + a->equippedWeight * 0.25f);
+				a->DamageActorValue(RE::ActorValue::kStamina, stCost * dt);
 			}
 
-			_RestoreActorValue(a, av, dt);
+			_update_RegenDelay(a, av, dt);
 		}
-
-		static inline REL::Relocation<decltype(RestoreActorValue)> _RestoreActorValue;
-
-	public:
-		static void Install()
-		{
-			_RestoreActorValue = SKSE::GetTrampoline().write_call<5>(REL::ID(37510).address() + 0x1b, RestoreActorValue);
-		}
-	};
-
-	class UpdateAV
-	{
-		static bool update_RegenDelay(RE::Actor* a, RE::ActorValue av, float) { return _update_RegenDelay(a, av, 0.0f); }
 
 		static inline REL::Relocation<decltype(update_RegenDelay)> _update_RegenDelay;
 
 	public:
 		static void Install()
 		{
-			_update_RegenDelay = SKSE::GetTrampoline().write_call<5>(REL::ID(37510).address() + 0x176, update_RegenDelay);
+			_update_RegenDelay = SKSE::GetTrampoline().write_call<5>(REL::ID(37510).address() + 0x1b, update_RegenDelay);
+		}
+	};
+
+	class RestoreAV
+	{
+		static bool RestoreActorValue(RE::Actor* a, RE::ActorValue av, float) { return _RestoreActorValue(a, av, 0.0f); }
+
+		static inline REL::Relocation<decltype(RestoreActorValue)> _RestoreActorValue;
+
+	public:
+		static void Install()
+		{
+			_RestoreActorValue = SKSE::GetTrampoline().write_call<5>(REL::ID(37510).address() + 0x176, RestoreActorValue);
 		}
 	};
 
@@ -510,8 +746,8 @@ namespace Hook
 	{
 		static float get_damage(void* _weap, RE::ActorValueOwner* a, float DamageMult, char isbow)
 		{
-			if (a->GetActorValue(RE::ActorValue::kStamina) < 32.0f) {
-				return _get_damage(_weap, a, DamageMult, isbow) * 0.6f;
+			if (a->GetActorValue(RE::ActorValue::kStamina) < 18.0f) {
+				return _get_damage(_weap, a, DamageMult, isbow) * 0.4f;
 			}
 			return _get_damage(_weap, a, DamageMult, isbow);
 		}
@@ -529,10 +765,10 @@ namespace Hook
 	{
 		static float get_thisattack_chance(RE::Actor* me, RE::Actor* he, RE::BGSAttackData* my_attackData)
 		{
-			//if (he->GetActorValue(RE::ActorValue::kStamina) < he->GetPermanentActorValue(RE::ActorValue::kStamina) * 0.2f)
-			//{
-			//	return 0.5f;
-			//}
+			if (he->GetActorValue(RE::ActorValue::kStamina) <= 0.0f) {
+				return 1.0f;
+			}
+
 			return _get_thisattack_chance(me, he, my_attackData);
 		}
 
@@ -550,7 +786,7 @@ namespace Hook
 		static void Jump(RE::Actor* a)
 		{
 			_Jump(a);
-			a->DamageActorValue(RE::ActorValue::kStamina, 12.0f + a->equippedWeight * 0.25f);
+			a->DamageActorValue(RE::ActorValue::kStamina, 5.0f + a->equippedWeight * 0.25f);
 		}
 
 		static inline REL::Relocation<decltype(Jump)> _Jump;
@@ -617,90 +853,100 @@ namespace Hook
 		}
 	};
 
-	void Initialize()
+	namespace ArmorRescaled
+	{
+		constexpr REL::Offset kInject1Offset(0x00743617);
+		constexpr REL::Offset kInject2Offset(0x00624FA2);
+
+		constexpr uint8_t kInject1Bytes[] = { 0xF3, 0x0F, 0x10, 0x4D, 0x77, 0xF3, 0x0F, 0x58, 0xC8, 0xF3, 0x0F, 0x11, 0x4D,
+			0x77 };
+
+		constexpr uint8_t kInject2Bytes[] = { 0xF3, 0x0F, 0x10, 0x0D, 0x22, 0xD0, 0xF1, 0x00, 0xF3, 0x44, 0x0F, 0x58, 0xC0, 0x44,
+			0x0F, 0x2F, 0xC1, 0x72, 0x04, 0x44, 0x0F, 0x28, 0xC1 };
+
+		//bool TestBytes(uintptr_t a_addr, const uint8_t* a_expected, size_t a_size)
+		//{
+		//	for (size_t i = 0; i < a_size; i++) {
+		//		if (*reinterpret_cast<uint8_t*>(a_addr + i) != a_expected[i]) {
+		//			SKSE::log::error("Byte mismatch at 0x{:X}+{}: got 0x{:02X}, expected 0x{:02X}", a_addr, i, *reinterpret_cast<uint8_t*>(a_addr + i), a_expected[i]);
+		//			return false;
+		//		}
+		//	}
+		//	return true;
+		//}
+
+		static inline float ConvertDamageResist(float vanillaResist)
+		{
+			vanillaResist = 0.0f;
+			return vanillaResist;
+		}
+
+		static void Install()
+		{
+			auto& trampoline = SKSE::GetTrampoline();
+
+			{
+				struct Inject1 : Xbyak::CodeGenerator
+				{
+					Inject1(uintptr_t a_retAddr) : Xbyak::CodeGenerator(34, nullptr)
+					{
+						movss(xmm0, ptr[rbp + 0x77]);
+						mov(rax, reinterpret_cast<uintptr_t>(&ConvertDamageResist));
+						call(rax);
+						movss(ptr[rbp + 0x77], xmm0);
+						mov(rax, a_retAddr);
+						jmp(rax);
+					}
+				};
+
+				uintptr_t addr = kInject1Offset.address();
+				Inject1 code(addr + sizeof(kInject1Bytes));
+				code.ready();
+
+				void* trampBuf = trampoline.allocate(code.getSize());
+				std::memcpy(trampBuf, code.getCode(), code.getSize());
+
+				trampoline.write_branch<5>(addr, trampBuf);
+				for (size_t i = 5; i < sizeof(kInject1Bytes); i++) {
+					REL::safe_write(addr + i, uint8_t(0x90));
+				}
+			}
+
+			{
+				struct Inject2 : Xbyak::CodeGenerator
+				{
+					Inject2() : Xbyak::CodeGenerator(sizeof(kInject2Bytes), nullptr)
+					{
+						movss(xmm0, xmm8);
+						mov(rax, reinterpret_cast<uintptr_t>(&ConvertDamageResist));
+						call(rax);
+						movss(xmm8, xmm0);
+					}
+				};
+
+				Inject2 code;
+				code.ready();
+
+				uint8_t patch[sizeof(kInject2Bytes)];
+				std::memset(patch, 0x90, sizeof(patch));
+				std::memcpy(patch, code.getCode(), code.getSize());
+
+				REL::safe_write(kInject2Offset.address(), patch, sizeof(patch));
+			}
+		}
+	}
+
+	static void Initialize()
 	{
 		LevelUpMenu::Install();
-		RestoreAV::Install();
+		Training::Install();
 		UpdateAV::Install();
+		RestoreAV::Install();
 		GetDamage::Install();
 		GetThisAttackChance::Install();
 		PlayerJump::Install();
 		AttackCostStamina::Install();
-	}
-}
-
-namespace ArmorRescaled
-{
-	constexpr REL::Offset kInject1Offset(0x00743617);
-	constexpr REL::Offset kInject2Offset(0x00624FA2);
-
-	constexpr uint8_t kInject1Bytes[] = { 0xF3, 0x0F, 0x10, 0x4D, 0x77, 0xF3, 0x0F, 0x58, 0xC8, 0xF3, 0x0F, 0x11, 0x4D, 0x77 };
-
-	constexpr uint8_t kInject2Bytes[] = { 0xF3, 0x0F, 0x10, 0x0D, 0x22, 0xD0, 0xF1, 0x00, 0xF3, 0x44, 0x0F, 0x58, 0xC0, 0x44, 0x0F, 0x2F, 0xC1, 0x72, 0x04, 0x44, 0x0F, 0x28, 0xC1 };
-
-	bool TestBytes(uintptr_t a_addr, const uint8_t* a_expected, size_t a_size)
-	{
-		for (size_t i = 0; i < a_size; i++) {
-			if (*reinterpret_cast<uint8_t*>(a_addr + i) != a_expected[i]) {
-				SKSE::log::error("Byte mismatch at 0x{:X}+{}: got 0x{:02X}, expected 0x{:02X}", a_addr, i, *reinterpret_cast<uint8_t*>(a_addr + i), a_expected[i]);
-				return false;
-			}
-		}
-		return true;
-	}
-
-	void Initialize()
-	{
-		auto& trampoline = SKSE::GetTrampoline();
-
-		{
-			struct Inject1 : Xbyak::CodeGenerator
-			{
-				Inject1(uintptr_t a_retAddr) : Xbyak::CodeGenerator(34, nullptr)
-				{
-					movss(xmm0, ptr[rbp + 0x77]);
-					mov(rax, reinterpret_cast<uintptr_t>(&ConvertDamageResist));
-					call(rax);
-					movss(ptr[rbp + 0x77], xmm0);
-					mov(rax, a_retAddr);
-					jmp(rax);
-				}
-			};
-
-			uintptr_t addr = kInject1Offset.address();
-			Inject1 code(addr + sizeof(kInject1Bytes));
-			code.ready();
-
-			void* trampBuf = trampoline.allocate(code.getSize());
-			std::memcpy(trampBuf, code.getCode(), code.getSize());
-
-			trampoline.write_branch<5>(addr, trampBuf);
-			for (size_t i = 5; i < sizeof(kInject1Bytes); i++) {
-				REL::safe_write(addr + i, uint8_t(0x90));
-			}
-		}
-
-		{
-			struct Inject2 : Xbyak::CodeGenerator
-			{
-				Inject2() : Xbyak::CodeGenerator(sizeof(kInject2Bytes), nullptr)
-				{
-					movss(xmm0, xmm8);
-					mov(rax, reinterpret_cast<uintptr_t>(&ConvertDamageResist));
-					call(rax);
-					movss(xmm8, xmm0);
-				}
-			};
-
-			Inject2 code;
-			code.ready();
-
-			uint8_t patch[sizeof(kInject2Bytes)];
-			std::memset(patch, 0x90, sizeof(patch));
-			std::memcpy(patch, code.getCode(), code.getSize());
-
-			REL::safe_write(kInject2Offset.address(), patch, sizeof(patch));
-		}
+		ArmorRescaled::Install();
 	}
 }
 
@@ -713,7 +959,7 @@ namespace Rebalance
 			return;
 
 		for (auto form : dataHandler->GetFormArray(RE::FormType::Weapon)) {
-			form->As<RE::TESObjectWEAP>()->attackDamage *= 3;
+			form->As<RE::TESObjectWEAP>()->attackDamage *= 4;
 		}
 	}
 
@@ -737,9 +983,7 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 
 		Rebalance::Initialize();
 
-		SettingsData::Initialize();
-
-		ArmorRescaled::Initialize();
+		GameSettings::Initialize();
 
 		Event::Initialize();
 
